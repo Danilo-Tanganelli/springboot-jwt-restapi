@@ -2,15 +2,15 @@ package br.mackenzie.restapi.jogo;
 
 import java.util.*;
 
-
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api")
 public class JogoController {
-  // private List<Jogo> jogos = new ArrayList<Jogo>();
   @Autowired
   private JogoRepository repository;
 
@@ -40,8 +40,8 @@ public class JogoController {
     getJogos().add(novoJogo);
     return repository.save(novoJogo);
   }
-  
-  @PutMapping("/jogos/editar/{id}")
+
+  @PutMapping("/jogos/{id}")
   Optional<Jogo> updateJogo(@RequestBody Jogo jogoBody, @PathVariable long id) {
     Optional<Jogo> opt = repository.findById(id);
 
@@ -52,6 +52,8 @@ public class JogoController {
       jogo.setGolsA(jogoBody.getGolsA());
       jogo.setGolsB(jogoBody.getGolsB());
       repository.save(jogo);
+    } else {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     return opt;
@@ -59,7 +61,13 @@ public class JogoController {
 
   @DeleteMapping("/jogos/{id}")
   void deleteJogo(@PathVariable long id) {
-    // getJogos().removeIf(j -> j.getId() == id);
-    repository.deleteById(id);
+    Optional<Jogo> opt = repository.findById(id);
+    if(opt.isPresent()){ 
+      repository.deleteById(id);
+    }else {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+   
   }
+
 }
