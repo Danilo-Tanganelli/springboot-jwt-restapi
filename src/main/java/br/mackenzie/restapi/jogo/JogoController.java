@@ -35,7 +35,7 @@ public class JogoController {
   }
 
   @PostMapping("/jogos")
-  public Jogo postJogo(@RequestBody Jogo jogoBody) {
+  public Jogo postNewJogo(@RequestBody Jogo jogoBody) {
     Jogo novoJogo = new Jogo(jogoBody.getTimeA(), jogoBody.getTimeB(), jogoBody.getGolsA(), jogoBody.getGolsB());
     getJogos().add(novoJogo);
     return repository.save(novoJogo);
