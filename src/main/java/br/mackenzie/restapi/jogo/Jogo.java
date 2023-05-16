@@ -14,10 +14,7 @@ public class Jogo {
 @javax.persistence.Id
 private long id;
 
-
-
  
-
   public String timeA;
   public String timeB;
   private int golsA;

@@ -21,6 +21,12 @@ public class AppsController {
     return repository.findAll();
   }
 
+  @GetMapping("/apps/procurar")
+  public List<Apps> getJogosFromTime(@RequestParam String dev) {
+    return repository.findByDevIgnoreCase(dev);
+  }
+
+
   @GetMapping("/apps/{id}")
   public Optional<Apps> getApps(@PathVariable long id) {
     return repository.findById(id);
