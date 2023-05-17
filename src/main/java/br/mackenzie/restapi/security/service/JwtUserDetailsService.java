@@ -1,6 +1,9 @@
 package br.mackenzie.restapi.security.service;
 
 import java.util.ArrayList;
+import java.util.Optional;
+
+import javax.xml.bind.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,10 +35,19 @@ public class JwtUserDetailsService implements UserDetailsService {
 				new ArrayList<>());
 	}
 	
-	public DAOUser save(UserDTO user) {
+	public DAOUser save(UserDTO user) throws ValidationException {
 		DAOUser newUser = new DAOUser();
+		if (user.getUsername().length()<3) {
+			throw new ValidationException("O nome de usuário deve ter pelo menos 3 caracteres");
+			}
+		Optional<DAOUser> existingUser = Optional.ofNullable(userDao.findByUsername(user.getUsername()));
+    if (existingUser.isPresent()) {
+        throw new ValidationException("Usuário já cadastrado");
+    }else{ 
 		newUser.setUsername(user.getUsername());
 		newUser.setPassword(bcryptEncoder.encode(user.getPassword()));
 		return userDao.save(newUser);
+	}
+	
 	}
 }
