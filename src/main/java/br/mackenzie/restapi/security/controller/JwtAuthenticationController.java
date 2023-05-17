@@ -2,7 +2,13 @@ package br.mackenzie.restapi.security.controller;
 
 
 
+import java.util.Optional;
+
+import javax.xml.bind.ValidationException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.mackenzie.restapi.security.config.JwtTokenUtil;
+import br.mackenzie.restapi.security.dao.UserDao;
+import br.mackenzie.restapi.security.model.DAOUser;
 import br.mackenzie.restapi.security.model.JwtRequest;
 import br.mackenzie.restapi.security.model.JwtResponse;
 import br.mackenzie.restapi.security.model.UserDTO;
@@ -24,7 +32,7 @@ import br.mackenzie.restapi.security.service.JwtUserDetailsService;
 @RestController
 @CrossOrigin
 public class JwtAuthenticationController {
-
+	UserDao repository;
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
@@ -48,9 +56,22 @@ public class JwtAuthenticationController {
 	}
 	
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ResponseEntity<?> saveUser(@RequestBody UserDTO user) throws Exception {
-		return ResponseEntity.ok(userDetailsService.save(user));
+	public ResponseEntity<?> saveUser(@RequestBody UserDTO user) {
+		try {
+			DAOUser savedUser = userDetailsService.save(user);
+			return ResponseEntity.ok(savedUser);
+		} catch (ValidationException ex) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+		} catch (Exception ex) {
+			if (ex instanceof DataIntegrityViolationException) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while saving the user");
+			} else {
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+			}
+		}
 	}
+
+	
 
 	private void authenticate(String username, String password) throws Exception {
 		try {

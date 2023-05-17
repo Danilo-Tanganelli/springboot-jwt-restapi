@@ -23,7 +23,7 @@ public class AppsController {
 
   @GetMapping("/apps/procurar")
   public List<Apps> getJogosFromTime(@RequestParam String dev) {
-    return repository.findByDevIgnoreCase(dev);
+    return repository.findByDevContainingIgnoreCaseAndDevStartingWithIgnoreCase(dev, dev);
   }
 
 
